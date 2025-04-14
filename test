@@ -137,12 +137,12 @@ local function connectOwnerCommands(player)
 				if targetHRP and char then
 					following = false
 					stopAllAnimations()
-					
+
 					local punchPos = targetHRP.Position - Vector3.new(0, 3, 0)
 					teleportToPosition(punchPos, targetHRP.Position)
 					lookAtMain()
 
-					task.wait(1)
+					task.wait(0.5)
 					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
 					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
 
