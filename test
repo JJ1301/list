@@ -74,6 +74,7 @@ end
 local function vanish()
 	following = false
 	stopAllAnimations()
+
 	if not vanishPart then
 		vanishPart = Instance.new("Part")
 		vanishPart.Size = Vector3.new(20, 2, 20)
@@ -83,6 +84,7 @@ local function vanish()
 		vanishPart.Name = "VanishPlatform"
 		vanishPart.Parent = Workspace
 	end
+
 	teleportToPosition(vanishPart.Position + Vector3.new(0, 3, 0), vanishPart.Position)
 end
 
@@ -107,6 +109,7 @@ local function connectOwnerCommands(player)
 	if commandConnection then
 		commandConnection:Disconnect()
 	end
+
 	mainPlayer = player
 	commandConnection = player.Chatted:Connect(function(msg)
 		if msg:sub(1, 6) == ".give " then
@@ -114,7 +117,7 @@ local function connectOwnerCommands(player)
 			local newPlayer = Players:FindFirstChild(newOwner)
 			if newPlayer then
 				ownerName = newOwner
-				ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Ownership successfully transferred to " .. newOwner, "All")
+				game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Ownership successfully transferred to " .. newOwner, "All")
 				connectOwnerCommands(newPlayer)
 			end
 		elseif msg == "SummonM!" then
@@ -134,70 +137,31 @@ local function connectOwnerCommands(player)
 				if targetHRP and char then
 					following = false
 					stopAllAnimations()
+
 					for _, part in ipairs(char:GetDescendants()) do
 						if part:IsA("BasePart") then
 							part.CanCollide = false
 						end
 					end
+
 					task.wait(1)
-					local punchPos = targetHRP.Position - Vector3.new(0, 2.5, 0)
+					local punchPos = targetHRP.Position - Vector3.new(0, 3, 0)
 					teleportToPosition(punchPos, targetHRP.Position)
 					lookAtMain()
+
 					task.wait(1)
 					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-					task.wait(0.2)
 					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+
+					task.wait(1)
+					vanish()
+
 					for _, part in ipairs(char:GetDescendants()) do
 						if part:IsA("BasePart") then
 							part.CanCollide = true
 						end
 					end
-					task.wait(1)
-					vanish()
 				end
-			end
-		elseif msg:sub(1, 6) == ".bring" then
-			local targetName = msg:sub(8)
-			local targetPlayer = Players:FindFirstChild(targetName)
-			if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-				local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-				local localHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-				local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
-				if targetHRP and localHRP and mainHRP then
-					following = false
-					stopAllAnimations()
-					local behindPosition = targetHRP.Position - targetHRP.CFrame.LookVector * 3 + Vector3.new(0, 3, 0)
-					teleportToPosition(behindPosition, targetHRP.Position)
-					lookAtMain()
-					task.wait(0.5)
-					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-					task.wait(0.1)
-					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-					task.wait(1)
-					local frontOfMain = getOffsetPosition(mainHRP, Vector3.new(0, 0, -3)) + Vector3.new(0, 3, 0)
-					teleportToPosition(frontOfMain, mainHRP.Position)
-					lookAtMain()
-					task.wait(2)
-					vanish()
-				end
-			end
-		elseif msg:sub(1, 5) == ".void" then
-			local targetName = msg:sub(7)
-			local targetPlayer = Players:FindFirstChild(targetName)
-			if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-				local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-				local behindPosition = targetHRP.Position - targetHRP.CFrame.LookVector * 3 + Vector3.new(0, 3, 0)
-				teleportToPosition(behindPosition, targetHRP.Position)
-				lookAtMain()
-				task.wait(0.5)
-				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-				task.wait(0.1)
-				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-				task.wait(1)
-				local voidPos = Vector3.new(10000000, 10000000, 10000000)
-				teleportToPosition(voidPos, voidPos + Vector3.new(0, 0, 1))
-				task.wait(2)
-				vanish()
 			end
 		end
 	end)
