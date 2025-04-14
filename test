@@ -137,14 +137,7 @@ local function connectOwnerCommands(player)
 				if targetHRP and char then
 					following = false
 					stopAllAnimations()
-
-					for _, part in ipairs(char:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CanCollide = false
-						end
-					end
-
-					task.wait(1)
+					
 					local punchPos = targetHRP.Position - Vector3.new(0, 3, 0)
 					teleportToPosition(punchPos, targetHRP.Position)
 					lookAtMain()
@@ -155,12 +148,6 @@ local function connectOwnerCommands(player)
 
 					task.wait(1)
 					vanish()
-
-					for _, part in ipairs(char:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CanCollide = true
-						end
-					end
 				end
 			end
 		end
