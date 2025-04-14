@@ -4,7 +4,7 @@ local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local MAIN_NAME = "G513245SAFhshga32rex"
+local MAIN_NAME = "aarkmizqr"
 local SUMMON_ANIMATION_ID = "rbxassetid://18450698238"
 
 local ownerName = MAIN_NAME
@@ -117,15 +117,18 @@ local function connectOwnerCommands(player)
             local newPlayer = Players:FindFirstChild(newOwner)
             if newPlayer then
                 ownerName = newOwner
-                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Ownership successfully transferred to " .. newOwner, "All")
+                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Ownership successfully transferred to " .. newOwner .. "!", "All")
                 connectOwnerCommands(newPlayer)
             end
         elseif msg == "SummonM!" then
             summon(Vector3.new(0, 0, -3))
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("I'm here Master " .. mainPlayer.Name .. "!", "All")
         elseif msg == "SummonR!" then
             summon(Vector3.new(2.5, 0, -3))
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("I'm here Master " .. mainPlayer.Name .. "!", "All")
         elseif msg == "SummonL!" then
             summon(Vector3.new(-2.5, 0, -3))
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("I'm here Master " .. mainPlayer.Name .. "!", "All")
         elseif msg == "Vanish!" then
             vanish()
         elseif msg == "Reset!" then
@@ -133,6 +136,10 @@ local function connectOwnerCommands(player)
             if humanoid then
                 humanoid.Health = 0
             end
+        elseif msg == "Credits!" then
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Script made by John!", "All")
+            task.wait(0.2)
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Owner's blue app: hn_009x", "All")
         elseif msg:sub(1, 7) == ".punch " then
             local targetName = msg:sub(8)
             local targetPlayer = Players:FindFirstChild(targetName)
@@ -142,15 +149,12 @@ local function connectOwnerCommands(player)
                 if targetHRP and char then
                     following = false
                     stopAllAnimations()
-
                     local punchPos = targetHRP.Position - Vector3.new(0, 3, 0)
                     teleportToPosition(punchPos, targetHRP.Position)
                     lookAtMain()
-
                     task.wait(0.2)
                     VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
                     VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-
                     task.wait(1)
                     vanish()
                 end
@@ -164,19 +168,14 @@ local function connectOwnerCommands(player)
                 if targetHRP and char then
                     stopAllAnimations()
                     following = false
-
-                    teleportToPosition(targetHRP.Position + Vector3.new(0, 3, 0), targetHRP.Position)
-
+					local behindPos = targetHRP.Position - (targetHRP.CFrame.LookVector * 3) + Vector3.new(0, 3, 0)
+					teleportToPosition(behindPos, targetHRP.Position)
                     task.wait(0.2)
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-
                     task.wait(0.5)
-
                     teleportToPosition(Vector3.new(10000000, 10000000, 10000000), Vector3.new())
-
                     task.wait(2.5)
-
                     vanish()
                 end
             end
@@ -190,38 +189,50 @@ local function connectOwnerCommands(player)
                 if targetHRP and altHRP and mainPlayer and mainPlayer.Character then
                     following = false
                     stopAllAnimations()
-
                     local behindPos = targetHRP.Position - (targetHRP.CFrame.LookVector * 3)
                     teleportToPosition(behindPos, targetHRP.Position)
-
                     task.wait(0.2)
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-
                     task.wait(0.2)
-
                     for _, part in ipairs(char:GetDescendants()) do
                         if part:IsA("BasePart") then
                             part.Anchored = true
                         end
                     end
-
                     task.wait(1.5)
-
                     for _, part in ipairs(char:GetDescendants()) do
                         if part:IsA("BasePart") then
                             part.Anchored = false
                         end
                     end
-
                     local mainHRP = mainPlayer.Character:FindFirstChild("HumanoidRootPart")
                     if mainHRP then
                         local frontPos = mainHRP.Position + (mainHRP.CFrame.LookVector * 25)
                         teleportToPosition(frontPos, mainHRP.Position)
                     end
-                    
                     task.wait(1)
-                    
+                    vanish()
+                end
+            end
+        elseif msg:sub(1, 6) == ".dunk " then
+            local targetName = msg:sub(7)
+            local targetPlayer = Players:FindFirstChild(targetName)
+            if targetPlayer and targetPlayer.Character then
+                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local char = Players.LocalPlayer.Character
+                if targetHRP and char then
+                    stopAllAnimations()
+                    following = false
+                    local behindPos = targetHRP.Position - (targetHRP.CFrame.LookVector * 3) + Vector3.new(0, 3, 0)
+					teleportToPosition(behindPos, targetHRP.Position)
+					lookAtMain()
+                    task.wait(0.2)
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Two, false, game)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Two, false, game)
+                    task.wait(1)
+                    teleportToPosition(targetHRP.Position + Vector3.new(0, 300, 0), targetHRP.Position)
+                    task.wait(1.5)
                     vanish()
                 end
             end
