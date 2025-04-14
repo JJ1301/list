@@ -16,225 +16,191 @@ local vanishPart = nil
 local followOffset = Vector3.new(0, 0, -3)
 local commandConnection = nil
 
-local altPositions = {
-    Left = Vector3.new(-2.5, 0, -3),
-    Middle = Vector3.new(0, 0, -3),
-    Right = Vector3.new(2.5, 0, -3),
-}
-
 local function getHumanoid()
-    local char = Players.LocalPlayer.Character
-    return char and char:FindFirstChildOfClass("Humanoid")
+	local char = Players.LocalPlayer.Character
+	return char and char:FindFirstChildOfClass("Humanoid")
 end
 
 local function playSummonAnimation()
-    local humanoid = getHumanoid()
-    if humanoid then
-        local animation = Instance.new("Animation")
-        animation.AnimationId = SUMMON_ANIMATION_ID
-        local animTrack = humanoid:LoadAnimation(animation)
-        animTrack:Play()
-    end
+	local humanoid = getHumanoid()
+	if humanoid then
+		local animation = Instance.new("Animation")
+		animation.AnimationId = SUMMON_ANIMATION_ID
+		local animTrack = humanoid:LoadAnimation(animation)
+		animTrack:Play()
+	end
 end
 
 local function stopAllAnimations()
-    local humanoid = getHumanoid()
-    if humanoid then
-        for _, track in humanoid:GetPlayingAnimationTracks() do
-            track:Stop()
-        end
-    end
+	local humanoid = getHumanoid()
+	if humanoid then
+		for _, track in humanoid:GetPlayingAnimationTracks() do
+			track:Stop()
+		end
+	end
 end
 
 local function getGroundY(position)
-    local ray = Ray.new(position + Vector3.new(0, 5, 0), Vector3.new(0, -50, 0))
-    local hit, pos = Workspace:FindPartOnRay(ray, Players.LocalPlayer.Character)
-    return hit and pos.Y or position.Y
+	local ray = Ray.new(position + Vector3.new(0, 5, 0), Vector3.new(0, -50, 0))
+	local hit, pos = Workspace:FindPartOnRay(ray, Players.LocalPlayer.Character)
+	return hit and pos.Y or position.Y
 end
 
 local function teleportToPosition(pos, lookAtPos)
-    local char = Players.LocalPlayer.Character
-    if char then
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.Anchored = false
-            local groundY = getGroundY(pos)
-            hrp.CFrame = CFrame.new(Vector3.new(pos.X, groundY, pos.Z), lookAtPos)
-        end
-    end
+	local char = Players.LocalPlayer.Character
+	if char then
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.Anchored = false
+			local groundY = getGroundY(pos)
+			hrp.CFrame = CFrame.new(Vector3.new(pos.X, groundY, pos.Z), lookAtPos)
+		end
+	end
 end
 
 local function getOffsetPosition(hrp, offsetVec)
-    return hrp.Position + (hrp.CFrame.RightVector * offsetVec.X) + (hrp.CFrame.LookVector * offsetVec.Z)
+	return hrp.Position + (hrp.CFrame.RightVector * offsetVec.X) + (hrp.CFrame.LookVector * offsetVec.Z)
 end
 
 local function lookAtMain()
-    if not mainPlayer then return end
-    local altHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if altHRP and mainHRP then
-        local currentPos = altHRP.Position
-        local targetPos = mainHRP.Position
-        altHRP.CFrame = CFrame.lookAt(currentPos, Vector3.new(targetPos.X, currentPos.Y, targetPos.Z))
-    end
+	if not mainPlayer then return end
+	local altHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if altHRP and mainHRP then
+		local currentPos = altHRP.Position
+		local targetPos = mainHRP.Position
+		altHRP.CFrame = CFrame.lookAt(currentPos, Vector3.new(targetPos.X, currentPos.Y, targetPos.Z))
+	end
 end
 
 local function vanish()
-    following = false
-    stopAllAnimations()
+	following = false
+	stopAllAnimations()
 
-    if not vanishPart then
-        vanishPart = Instance.new("Part")
-        vanishPart.Size = Vector3.new(20, 2, 20)
-        vanishPart.Position = Vector3.new(1000, 1000, 1000)
-        vanishPart.Anchored = true
-        vanishPart.Transparency = 0.5
-        vanishPart.Name = "VanishPlatform"
-        vanishPart.Parent = Workspace
-    end
+	if not vanishPart then
+		vanishPart = Instance.new("Part")
+		vanishPart.Size = Vector3.new(20, 2, 20)
+		vanishPart.Position = Vector3.new(1000, 1000, 1000)
+		vanishPart.Anchored = true
+		vanishPart.Transparency = 0.5
+		vanishPart.Name = "VanishPlatform"
+		vanishPart.Parent = Workspace
+	end
 
-    teleportToPosition(vanishPart.Position + Vector3.new(0, 3, 0), vanishPart.Position)
+	teleportToPosition(vanishPart.Position + Vector3.new(0, 3, 0), vanishPart.Position)
 end
 
 local function summon(offsetVec)
-    if not mainPlayer then return end
-    local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if mainHRP then
-        following = false
-        stopAllAnimations()
-        followOffset = offsetVec
-        local pos = getOffsetPosition(mainHRP, offsetVec)
-        teleportToPosition(pos, mainHRP.Position)
-        lookAtMain()
-        task.wait(0.05)
-        playSummonAnimation()
-        task.wait(0.05)
-        following = true
-    end
-end
-
-local function teleportAltToPosition(targetPlayer, positionKey)
-    local targetHRP = targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if targetHRP then
-        local pos = altPositions[positionKey]
-        if pos then
-            teleportToPosition(pos, targetHRP.Position)
-        end
-    end
+	if not mainPlayer then return end
+	local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if mainHRP then
+		following = false
+		stopAllAnimations()
+		followOffset = offsetVec
+		local pos = getOffsetPosition(mainHRP, offsetVec)
+		teleportToPosition(pos, mainHRP.Position)
+		lookAtMain()
+		task.wait(0.05)
+		playSummonAnimation()
+		task.wait(0.05)
+		following = true
+	end
 end
 
 local function connectOwnerCommands(player)
-    if commandConnection then
-        commandConnection:Disconnect()
-    end
+	if commandConnection then
+		commandConnection:Disconnect()
+	end
 
-    mainPlayer = player
-    commandConnection = player.Chatted:Connect(function(msg)
-        if msg:sub(1, 6) == ".give " then
-            local newOwner = msg:sub(7)
-            local newPlayer = Players:FindFirstChild(newOwner)
-            if newPlayer then
-                ownerName = newOwner
-                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Ownership transferred to " .. newOwner, "All")
-                connectOwnerCommands(newPlayer)
-            end
-        elseif msg == "SummonM!" then
-            summon(Vector3.new(0, 0, -3))
-        elseif msg == "SummonR!" then
-            summon(Vector3.new(2.5, 0, -3))
-        elseif msg == "SummonL!" then
-            summon(Vector3.new(-2.5, 0, -3))
-        elseif msg == "Vanish!" then
-            vanish()
-        elseif msg:sub(1, 6) == ".bring" then
-            local targetName = msg:sub(8)
-            local targetPlayer = Players:FindFirstChild(targetName)
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-                local localHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if targetHRP and localHRP and mainHRP then
-                    following = false
-                    stopAllAnimations()
-                    local behindPosition = targetHRP.Position - targetHRP.CFrame.LookVector * 3 + Vector3.new(0, 3, 0)
-                    teleportToPosition(behindPosition, targetHRP.Position)
-                    lookAtMain()
-                    task.wait(0.5)
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-                    task.wait(0.1)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-                    task.wait(1)
-                    local frontOfMain = getOffsetPosition(mainHRP, Vector3.new(0, 0, -3)) + Vector3.new(0, 3, 0)
-                    teleportToPosition(frontOfMain, mainHRP.Position)
-                    lookAtMain()
-                    task.wait(2)
-                    vanish()
-                end
-            end
-        elseif msg:sub(1, 5) == ".void" then
-            local targetName = msg:sub(7)
-            local targetPlayer = Players:FindFirstChild(targetName)
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-                local behindPosition = targetHRP.Position - targetHRP.CFrame.LookVector * 3 + Vector3.new(0, 3, 0)
-                teleportToPosition(behindPosition, targetHRP.Position)
-                lookAtMain()
-                task.wait(0.5)
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-                task.wait(0.1)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-                task.wait(1)
-                local voidPos = Vector3.new(10000000, 10000000, 10000000)
-                teleportToPosition(voidPos, voidPos + Vector3.new(0, 0, 1))
-                task.wait(2)
-                vanish()
-            end
-        elseif msg:sub(1, 5) == ".left " then
-            local altName = msg:sub(7)
-            local altPlayer = Players:FindFirstChild(altName)
-            if altPlayer then
-                teleportAltToPosition(altPlayer, "Left")
-            end
-        elseif msg:sub(1, 8) == ".middle " then
-            local altName = msg:sub(9)
-            local altPlayer = Players:FindFirstChild(altName)
-            if altPlayer then
-                teleportAltToPosition(altPlayer, "Middle")
-            end
-        elseif msg:sub(1, 6) == ".right " then
-            local altName = msg:sub(7)
-            local altPlayer = Players:FindFirstChild(altName)
-            if altPlayer then
-                teleportAltToPosition(altPlayer, "Right")
-            end
-        end
-    end)
+	mainPlayer = player
+	commandConnection = player.Chatted:Connect(function(msg)
+		if msg:sub(1, 6) == ".give " then
+			local newOwner = msg:sub(7)
+			local newPlayer = Players:FindFirstChild(newOwner)
+			if newPlayer then
+				ownerName = newOwner
+				game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Ownership transferred to " .. newOwner, "All")
+				connectOwnerCommands(newPlayer)
+			end
+		elseif msg == "SummonM!" then
+			summon(Vector3.new(0, 0, -3))
+		elseif msg == "SummonR!" then
+			summon(Vector3.new(2.5, 0, -3))
+		elseif msg == "SummonL!" then
+			summon(Vector3.new(-2.5, 0, -3))
+		elseif msg == "Vanish!" then
+			vanish()
+		elseif msg:sub(1, 6) == ".bring" then
+			local targetName = msg:sub(8)
+			local targetPlayer = Players:FindFirstChild(targetName)
+			if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+				local localHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+				local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if targetHRP and localHRP and mainHRP then
+					following = false
+					stopAllAnimations()
+					local behindPosition = targetHRP.Position - targetHRP.CFrame.LookVector * 3 + Vector3.new(0, 3, 0)
+					teleportToPosition(behindPosition, targetHRP.Position)
+					lookAtMain()
+					task.wait(0.5)
+					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+					task.wait(0.1)
+					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+					task.wait(1)
+					local frontOfMain = getOffsetPosition(mainHRP, Vector3.new(0, 0, -3)) + Vector3.new(0, 3, 0)
+					teleportToPosition(frontOfMain, mainHRP.Position)
+					lookAtMain()
+					task.wait(2)
+					vanish()
+				end
+			end
+		elseif msg:sub(1, 5) == ".void" then
+			local targetName = msg:sub(7)
+			local targetPlayer = Players:FindFirstChild(targetName)
+			if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+				local behindPosition = targetHRP.Position - targetHRP.CFrame.LookVector * 3 + Vector3.new(0, 3, 0)
+				teleportToPosition(behindPosition, targetHRP.Position)
+				lookAtMain()
+				task.wait(0.5)
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+				task.wait(0.1)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+				task.wait(1)
+				local voidPos = Vector3.new(10000000, 10000000, 10000000)
+				teleportToPosition(voidPos, voidPos + Vector3.new(0, 0, 1))
+				task.wait(2)
+				vanish()
+			end
+		end
+	end)
 end
 
 for _, p in Players:GetPlayers() do
-    if p.Name == ownerName then
-        connectOwnerCommands(p)
-    end
+	if p.Name == ownerName then
+		connectOwnerCommands(p)
+	end
 end
 
 Players.PlayerAdded:Connect(function(p)
-    if p.Name == ownerName then
-        connectOwnerCommands(p)
-    end
+	if p.Name == ownerName then
+		connectOwnerCommands(p)
+	end
 end)
 
 RunService.RenderStepped:Connect(function()
-    if following and mainPlayer then
-        local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local altHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if mainHRP and altHRP then
-            local targetPos = getOffsetPosition(mainHRP, followOffset)
-            local dir = (targetPos - altHRP.Position)
-            local dist = dir.Magnitude
-            if dist > 0.1 then
-                altHRP.CFrame = CFrame.new(altHRP.Position + dir.Unit * math.min(dist, 2))
-            end
-            lookAtMain()
-        end
-    end
+	if following and mainPlayer then
+		local mainHRP = mainPlayer.Character and mainPlayer.Character:FindFirstChild("HumanoidRootPart")
+		local altHRP = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if mainHRP and altHRP then
+			local targetPos = getOffsetPosition(mainHRP, followOffset)
+			local dir = (targetPos - altHRP.Position)
+			local dist = dir.Magnitude
+			if dist > 0.1 then
+				altHRP.CFrame = CFrame.new(altHRP.Position + dir.Unit * math.min(dist, 2))
+			end
+			lookAtMain()
+		end
+	end
 end)
